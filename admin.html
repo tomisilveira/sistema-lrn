@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Liga Robótica</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input, select, button { padding: 8px; margin: 5px; }
+    fieldset { margin: 15px 0; padding: 15px; }
+  </style>
+</head>
+<body>
+  <h1>🛠️ Panel de Administrador</h1>
+
+  <fieldset>
+    <legend>Registrar Equipo</legend>
+    <input type="text" id="nombre" placeholder="Nombre del equipo" required>
+    <select id="categoria">
+      <option value="infantil">Infantil (7–12)</option>
+      <option value="juvenil">Juvenil/Adultos (13+)</option>
+    </select>
+    <select id="disciplina">
+      <option>Fútbol Robótico</option>
+      <option>Sumo Autónomo</option>
+      <option>Sumo Radiocontrolado</option>
+      <option>Mini Sumo Autónomo</option>
+      <option>Mini Sumo Radiocontrolado</option>
+    </select>
+    <input type="text" id="institucion" placeholder="Institución (opcional)">
+    <button onclick="registrar()">Registrar</button>
+  </fieldset>
+
+  <script>
+    const API_BASE = 'https://sheetdb.io/api/v1/TU_ID_AQUI'; // ← ¡Cambia esto!
+
+    function registrar() {
+      const nombre = document.getElementById('nombre').value;
+      const categoria = document.getElementById('categoria').value;
+      const disciplina = document.getElementById('disciplina').value;
+      const institucion = document.getElementById('institucion').value;
+      if (!nombre || !disciplina) { alert('Completa los campos'); return; }
+
+      fetch(`${API_BASE}/Equipos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre, categoria, disciplina, institucion })
+      }).then(() => {
+        alert('Equipo registrado');
+        document.getElementById('nombre').value = '';
+        document.getElementById('institucion').value = '';
+      });
+    }
+  </script>
+</body>
+</html>
