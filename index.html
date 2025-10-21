@@ -25,7 +25,7 @@
 
     function cargarTodo() {
       // Posiciones
-      fetch(`${API_BASE}/Equipos`)
+      fetch(`${API_BASE}/equipos`)
         .then(r => r.json())
         .then(equipos => {
           fetch(`${API_BASE}/Partidos`)
@@ -34,7 +34,7 @@
         });
 
       // Último resultado
-      fetch(`${API_BASE}/Partidos?estado=completado&_sort_by=id&_sort_order=desc&_limit=1`)
+      fetch(`${API_BASE}/partidos?estado=completado&_sort_by=id&_sort_order=desc&_limit=1`)
         .then(r => r.json())
         .then(data => {
           if (data.length > 0) {
@@ -46,7 +46,7 @@
         });
 
       // Próximo partido
-      fetch(`${API_BASE}/Partidos?estado=pendiente&_sort_by=id&_limit=1`)
+      fetch(`${API_BASE}/partidos?estado=pendiente&_sort_by=id&_limit=1`)
         .then(r => r.json())
         .then(data => {
           if (data.length > 0) {

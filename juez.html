@@ -19,7 +19,7 @@
     const API_BASE = 'https://sheetdb.io/api/v1/sp50piqxi7jvm'; // ← ¡Cambia esto!
 
     function cargarPartidos() {
-      fetch(`${API_BASE}/Partidos?estado=pendiente`)
+      fetch(`${API_BASE}/partidos?estado=pendiente`)
         .then(r => r.json())
         .then(partidos => {
           if (partidos.length === 0) {
@@ -46,7 +46,7 @@
     }
 
     function resultado(id, a, b) {
-      fetch(`${API_BASE}/Partidos/${id}`, {
+      fetch(`${API_BASE}/partidos/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ puntosA: a, puntosB: b, estado: 'completado' })

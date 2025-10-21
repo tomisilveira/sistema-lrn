@@ -41,7 +41,7 @@
       const institucion = document.getElementById('institucion').value;
       if (!nombre || !disciplina) { alert('Completa los campos'); return; }
 
-      fetch(`${API_BASE}/Equipos`, {
+      fetch(`${API_BASE}/equipos`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre, categoria, disciplina, institucion })
