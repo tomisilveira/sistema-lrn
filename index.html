@@ -5,10 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Liga Robótica Neuquina 2025</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #000; color: #fff; margin: 0; padding: 10px; }
-    h1 { text-align: center; font-size: 2.2em; margin: 10px 0; }
-    .destacado { background: #ff0; color: #000; padding: 10px; margin: 15px 0; border-radius: 8px; text-align: center; font-weight: bold; }
-    .proximo { background: #00f; padding: 10px; margin: 15px 0; border-radius: 8px; text-align: center; }
+    body { font-family: Arial, sans-serif; background: #000; color: #fff; margin: 0; padding: 15px; }
+    h1 { text-align: center; font-size: 2em; margin: 10px 0; }
+    .destacado, .proximo { border-radius: 8px; padding: 10px; text-align: center; margin: 15px 0; font-weight: bold; }
+    .destacado { background: #ff0; color: #000; }
+    .proximo { background: #00f; color: #fff; }
     table { width: 100%; border-collapse: collapse; margin: 15px 0; }
     th, td { padding: 8px; border: 1px solid #fff; text-align: center; }
     th { background: #333; }
@@ -21,91 +22,69 @@
   <div id="posiciones"></div>
 
   <script>
-    const API_BASE = 'https://sheetdb.io/api/v1/sp50piqxi7jvm'; // ← ¡Cambia esto!
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbzT1twIqcB8c-HjT7Pof9qcZOQ_omYj1QiSS9POvs6UmA-4QqyOMTDkKhT8wcHu-b9s/exec'; // 👈 reemplazá
 
-    function cargarTodo() {
-      // Posiciones
-      fetch(`${API_BASE}/equipos`)
-        .then(r => r.json())
-        .then(equipos => {
-          fetch(`${API_BASE}/Partidos`)
-            .then(r => r.json())
-            .then(partidos => mostrarPosiciones(equipos, partidos));
-        });
+    async function cargarTodo() {
+      const equipos = await fetch(`${API_BASE}?tipo=equipos`).then(r => r.json());
+      const partidos = await fetch(`${API_BASE}?tipo=partidos`).then(r => r.json());
+      mostrarPosiciones(equipos, partidos);
+      mostrarUltimo(partidos);
+      mostrarProximo(partidos);
+    }
 
-      // Último resultado
-      fetch(`${API_BASE}/partidos?estado=completado&_sort_by=id&_sort_order=desc&_limit=1`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.length > 0) {
-            const p = data[0];
-            const ganador = p.puntosA > p.puntosB ? p.equipoA : p.equipoB;
-            document.getElementById('ultimo').innerHTML = 
-              `<div class="destacado">✅ Último: ${p.equipoA} vs ${p.equipoB} → ${ganador} gana (${p.puntosA}-${p.puntosB})</div>`;
-          }
-        });
+    function mostrarUltimo(partidos) {
+      const jugados = partidos.filter(p => p.estado === 'completado');
+      if (jugados.length === 0) return;
+      const p = jugados[jugados.length - 1];
+      const ganador = p.puntosA > p.puntosB ? p.equipoA : p.equipoB;
+      document.getElementById('ultimo').innerHTML = 
+        `<div class="destacado">✅ Último: ${p.equipoA} vs ${p.equipoB} → ${ganador} gana (${p.puntosA}-${p.puntosB})</div>`;
+    }
 
-      // Próximo partido
-      fetch(`${API_BASE}/partidos?estado=pendiente&_sort_by=id&_limit=1`)
-        .then(r => r.json())
-        .then(data => {
-          if (data.length > 0) {
-            const p = data[0];
-            document.getElementById('proximo').innerHTML = 
-              `<div class="proximo">➡️ Próximo: ${p.disciplina} (${p.categoria})<br>${p.equipoA} vs ${p.equipoB}</div>`;
-          }
-        });
+    function mostrarProximo(partidos) {
+      const pendientes = partidos.filter(p => p.estado === 'pendiente');
+      if (pendientes.length === 0) return;
+      const p = pendientes[0];
+      document.getElementById('proximo').innerHTML = 
+        `<div class="proximo">➡️ Próximo: ${p.disciplina} (${p.categoria})<br>${p.equipoA} vs ${p.equipoB}</div>`;
     }
 
     function mostrarPosiciones(equipos, partidos) {
       const stats = {};
       equipos.forEach(e => {
-        const key = e.nombre + '|' + e.disciplina + '|' + e.categoria;
+        const key = `${e.nombre}|${e.disciplina}|${e.categoria}`;
         stats[key] = { nombre: e.nombre, disciplina: e.disciplina, categoria: e.categoria, jugados: 0, victorias: 0, puntos: 0 };
       });
 
-      partidos
-        .filter(p => p.estado === 'completado')
-        .forEach(p => {
-          const keyA = p.equipoA + '|' + p.disciplina + '|' + p.categoria;
-          const keyB = p.equipoB + '|' + p.disciplina + '|' + p.categoria;
-          if (stats[keyA]) {
-            stats[keyA].jugados++;
-            stats[keyA].victorias += p.puntosA == 1 ? 1 : 0;
-            stats[keyA].puntos += Number(p.puntosA || 0);
-          }
-          if (stats[keyB]) {
-            stats[keyB].jugados++;
-            stats[keyB].victorias += p.puntosB == 1 ? 1 : 0;
-            stats[keyB].puntos += Number(p.puntosB || 0);
-          }
-        });
+      partidos.filter(p => p.estado === 'completado').forEach(p => {
+        const keyA = `${p.equipoA}|${p.disciplina}|${p.categoria}`;
+        const keyB = `${p.equipoB}|${p.disciplina}|${p.categoria}`;
+        if (stats[keyA]) { stats[keyA].jugados++; stats[keyA].victorias += p.puntosA > p.puntosB ? 1 : 0; stats[keyA].puntos += Number(p.puntosA || 0); }
+        if (stats[keyB]) { stats[keyB].jugados++; stats[keyB].victorias += p.puntosB > p.puntosA ? 1 : 0; stats[keyB].puntos += Number(p.puntosB || 0); }
+      });
 
       const grupos = {};
       Object.values(stats).forEach(s => {
-        const key = s.disciplina + '|' + s.categoria;
+        const key = `${s.disciplina}|${s.categoria}`;
         if (!grupos[key]) grupos[key] = [];
         grupos[key].push(s);
-      });
-
-      Object.keys(grupos).forEach(k => {
-        grupos[k].sort((a, b) => b.puntos - a.puntos || b.victorias - a.victorias);
       });
 
       let html = '';
       for (const key in grupos) {
         const [d, c] = key.split('|');
+        grupos[key].sort((a, b) => b.puntos - a.puntos || b.victorias - a.victorias);
         html += `<h2>${d} - ${c}</h2><table><tr><th>Equipo</th><th>J</th><th>V</th><th>Pts</th></tr>`;
         grupos[key].forEach(eq => {
           html += `<tr><td>${eq.nombre}</td><td>${eq.jugados}</td><td>${eq.victorias}</td><td>${eq.puntos}</td></tr>`;
         });
-        html += '</table>';
+        html += `</table>`;
       }
       document.getElementById('posiciones').innerHTML = html;
     }
 
     cargarTodo();
-    setInterval(cargarTodo, 10000); // Actualiza cada 10 segundos
+    setInterval(cargarTodo, 10000);
   </script>
 </body>
 </html>

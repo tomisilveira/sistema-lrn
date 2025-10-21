@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Liga Robótica</title>
+  <title>Admin - Liga Robótica Neuquina 2025</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    input, select, button { padding: 8px; margin: 5px; }
-    fieldset { margin: 15px 0; padding: 15px; }
+    body { font-family: Arial, sans-serif; background: #000; color: #fff; padding: 20px; }
+    fieldset { border: 1px solid #555; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+    input, select, button { padding: 8px; margin: 5px; border-radius: 6px; border: none; }
+    button { background: #ff0; color: #000; font-weight: bold; cursor: pointer; }
+    h1 { text-align: center; }
   </style>
 </head>
 <body>
-  <h1>🛠️ Panel de Administrador</h1>
+  <h1>🛠️ Panel de Administración</h1>
 
   <fieldset>
     <legend>Registrar Equipo</legend>
@@ -31,26 +33,64 @@
     <button onclick="registrar()">Registrar</button>
   </fieldset>
 
+  <fieldset>
+    <legend>Registrar Partido</legend>
+    <input type="text" id="equipoA" placeholder="Equipo A">
+    <input type="text" id="equipoB" placeholder="Equipo B">
+    <select id="disciplinaP">
+      <option>Fútbol Robótico</option>
+      <option>Sumo Autónomo</option>
+      <option>Sumo Radiocontrolado</option>
+      <option>Mini Sumo Autónomo</option>
+      <option>Mini Sumo Radiocontrolado</option>
+    </select>
+    <select id="categoriaP">
+      <option value="infantil">Infantil</option>
+      <option value="juvenil">Juvenil/Adultos</option>
+    </select>
+    <button onclick="registrarPartido()">Registrar Partido</button>
+  </fieldset>
+
   <script>
-    const API_BASE = 'https://sheetdb.io/api/v1/sp50piqxi7jvm'; // ← ¡Cambia esto!
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbzT1twIqcB8c-HjT7Pof9qcZOQ_omYj1QiSS9POvs6UmA-4QqyOMTDkKhT8wcHu-b9s/exec'; // 👈 reemplazá con tu URL real
 
     function registrar() {
-      const nombre = document.getElementById('nombre').value;
-      const categoria = document.getElementById('categoria').value;
-      const disciplina = document.getElementById('disciplina').value;
-      const institucion = document.getElementById('institucion').value;
-      if (!nombre || !disciplina) { alert('Completa los campos'); return; }
+      const nombre = nombreInput.value;
+      const categoria = categoria.value;
+      const disciplina = disciplina.value;
+      const institucion = institucionInput.value;
+      if (!nombre || !disciplina) return alert('Completa los campos');
 
-      fetch(`${API_BASE}/equipos`, {
+      fetch(API_BASE, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre, categoria, disciplina, institucion })
-      }).then(() => {
-        alert('Equipo registrado');
-        document.getElementById('nombre').value = '';
-        document.getElementById('institucion').value = '';
+        body: JSON.stringify({ tipo: 'equipos', nombre, categoria, disciplina, institucion })
+      }).then(r => r.json()).then(() => {
+        alert('✅ Equipo registrado');
+        nombreInput.value = ''; institucionInput.value = '';
       });
     }
+
+    function registrarPartido() {
+      const equipoA = document.getElementById('equipoA').value;
+      const equipoB = document.getElementById('equipoB').value;
+      const disciplina = document.getElementById('disciplinaP').value;
+      const categoria = document.getElementById('categoriaP').value;
+      if (!equipoA || !equipoB) return alert('Completa los nombres de ambos equipos');
+
+      fetch(API_BASE, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tipo: 'partidos', equipoA, equipoB, disciplina, categoria })
+      }).then(r => r.json()).then(() => {
+        alert('⚽ Partido registrado');
+        document.getElementById('equipoA').value = '';
+        document.getElementById('equipoB').value = '';
+      });
+    }
+
+    const nombreInput = document.getElementById('nombre');
+    const institucionInput = document.getElementById('institucion');
   </script>
 </body>
 </html>

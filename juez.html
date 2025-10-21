@@ -3,12 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Jueces - Liga Robótica</title>
+  <title>Jueces - Liga Robótica Neuquina 2025</title>
   <style>
-    body { font-family: Arial; padding: 15px; }
-    table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-    th, td { padding: 10px; border: 1px solid #ccc; text-align: center; }
-    button { padding: 6px 12px; margin: 3px; cursor: pointer; }
+    body { font-family: Arial, sans-serif; background: #111; color: #fff; padding: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { padding: 8px; border: 1px solid #666; text-align: center; }
+    button { padding: 6px 12px; margin: 2px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    .a { background: #28a745; color: white; }
+    .b { background: #007bff; color: white; }
   </style>
 </head>
 <body>
@@ -16,18 +18,19 @@
   <div id="partidos"></div>
 
   <script>
-    const API_BASE = 'https://sheetdb.io/api/v1/sp50piqxi7jvm'; // ← ¡Cambia esto!
+    const API_BASE = 'https://script.google.com/macros/s/AKfycbzT1twIqcB8c-HjT7Pof9qcZOQ_omYj1QiSS9POvs6UmA-4QqyOMTDkKhT8wcHu-b9s/exec'; // 👈 reemplazá
 
     function cargarPartidos() {
-      fetch(`${API_BASE}/partidos?estado=pendiente`)
+      fetch(`${API_BASE}?tipo=partidos`)
         .then(r => r.json())
         .then(partidos => {
-          if (partidos.length === 0) {
+          const pendientes = partidos.filter(p => p.estado === 'pendiente');
+          if (pendientes.length === 0) {
             document.getElementById('partidos').innerHTML = '<p>No hay partidos pendientes.</p>';
             return;
           }
-          let html = '<table><tr><th>Disciplina</th><th>Cat.</th><th>A</th><th>B</th><th>Acción</th></tr>';
-          partidos.forEach(p => {
+          let html = '<table><tr><th>Disciplina</th><th>Categoría</th><th>Equipo A</th><th>Equipo B</th><th>Acción</th></tr>';
+          pendientes.forEach(p => {
             html += `
               <tr>
                 <td>${p.disciplina}</td>
@@ -35,8 +38,8 @@
                 <td>${p.equipoA}</td>
                 <td>${p.equipoB}</td>
                 <td>
-                  <button onclick="resultado('${p.id}', 1, 0)">Gana ${p.equipoA}</button>
-                  <button onclick="resultado('${p.id}', 0, 1)">Gana ${p.equipoB}</button>
+                  <button class="a" onclick="resultado('${p.id}',1,0)">Gana ${p.equipoA}</button>
+                  <button class="b" onclick="resultado('${p.id}',0,1)">Gana ${p.equipoB}</button>
                 </td>
               </tr>`;
           });
@@ -46,14 +49,15 @@
     }
 
     function resultado(id, a, b) {
-      fetch(`${API_BASE}/partidos/${id}`, {
+      fetch(API_BASE, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ puntosA: a, puntosB: b, estado: 'completado' })
-      }).then(() => {
-        alert('Resultado guardado');
-        cargarPartidos();
-      });
+        body: JSON.stringify({ id, puntosA: a, puntosB: b })
+      }).then(r => r.json())
+        .then(() => {
+          alert('✅ Resultado guardado');
+          cargarPartidos();
+        });
     }
 
     cargarPartidos();
